@@ -1,0 +1,1 @@
+// Todas las funciones fetch (GET, POST, PUT, DELETE)
