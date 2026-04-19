@@ -1,20 +1,312 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuestro Blog</title>
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/layout.css">
+    <title>The Daily Post</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-    
-    
+
+    <!-- barra de navegación principal -->
+    <header class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-brand" data-route="home">The Daily Post</div>
+            <nav class="navbar-links">
+                <a class="nav-link active" data-route="home">Inicio</a>
+                <a class="nav-link" data-route="create">Nueva publicación</a>
+                <a class="nav-link" data-route="by-author">Por autor</a>
+            </nav>
+            <!-- botón para móvil -->
+            <button class="hamburger" id="hamburger" aria-label="Menú">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- vista de inicio con el listado de posts -->
+        <section id="view-home" class="view active">
+            <div class="container">
+
+                <!-- barra de búsqueda y filtros -->
+                <div class="filters-bar">
+                    <div class="search-wrapper">
+                        <span class="search-icon">&#9906;</span>
+                        <input
+                            type="text"
+                            id="search-input"
+                            class="search-input"
+                            placeholder="Buscar por título o contenido..."
+                        />
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-tag" class="filter-select">
+                            <option value="">Todas las etiquetas</option>
+                        </select>
+                        <select id="filter-user" class="filter-select">
+                            <option value="">Todos los autores</option>
+                        </select>
+                        <button id="btn-clear-filters" class="btn btn-outline">Limpiar</button>
+                    </div>
+                </div>
+
+                <!-- skeleton loader mientras carga la API -->
+                <div id="loader-home" class="loader-wrapper hidden">
+                    <div class="skeleton-grid">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+
+                <!-- mensaje de error si falla la petición -->
+                <div id="error-home" class="error-banner hidden">
+                    <span class="error-icon">&#9888;</span>
+                    <p id="error-home-msg">Ocurrió un error al cargar las publicaciones.</p>
+                    <button id="btn-retry" class="btn btn-outline">Reintentar</button>
+                </div>
+
+                <!-- mensaje cuando no hay resultados -->
+                <div id="empty-home" class="empty-state hidden">
+                    <p class="empty-icon">&#128196;</p>
+                    <p>No se encontraron publicaciones con esos filtros.</p>
+                </div>
+
+                <!-- aquí se renderizan las tarjetas dinámicamente -->
+                <div id="posts-grid" class="posts-grid"></div>
+
+                <!-- controles de paginación -->
+                <div id="pagination" class="pagination hidden">
+                    <button id="btn-prev" class="btn btn-outline" disabled>&#8592; Anterior</button>
+                    <span id="page-info" class="page-info"></span>
+                    <button id="btn-next" class="btn btn-outline">Siguiente &#8594;</button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- vista de detalle de una publicación -->
+        <section id="view-detail" class="view hidden">
+            <div class="container container--narrow">
+
+                <button class="btn btn-ghost back-btn" data-route="home">&#8592; Volver al inicio</button>
+
+                <!-- loader mientras trae el post por ID -->
+                <div id="loader-detail" class="loader-wrapper hidden">
+                    <div class="skeleton-detail">
+                        <div class="skeleton-line skeleton-line--title"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line skeleton-line--short"></div>
+                    </div>
+                </div>
+
+                <div id="error-detail" class="error-banner hidden">
+                    <span class="error-icon">&#9888;</span>
+                    <p>No se pudo cargar la publicación.</p>
+                </div>
+
+                <!-- contenido del post, se llena desde ui.js -->
+                <article id="post-detail" class="post-detail hidden">
+                    <div class="post-detail__tags" id="detail-tags"></div>
+                    <h1 class="post-detail__title" id="detail-title"></h1>
+                    <div class="post-detail__meta">
+                        <span id="detail-author" class="detail-author"></span>
+                        <span class="meta-sep">·</span>
+                        <span id="detail-views">&#128065; <span></span> vistas</span>
+                        <span class="meta-sep">·</span>
+                        <span id="detail-likes">&#10084; <span></span> likes</span>
+                        <span class="meta-sep">·</span>
+                        <span id="detail-dislikes">&#128078; <span></span> dislikes</span>
+                    </div>
+                    <div class="post-detail__divider"></div>
+                    <p class="post-detail__body" id="detail-body"></p>
+                    <div class="post-detail__actions">
+                        <button class="btn btn-primary" id="btn-edit-detail">&#9998; Editar</button>
+                        <button class="btn btn-danger" id="btn-delete-detail">&#128465; Eliminar</button>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- formulario para crear una nueva publicación -->
+        <section id="view-create" class="view hidden">
+            <div class="container container--narrow">
+
+                <button class="btn btn-ghost back-btn" data-route="home">&#8592; Volver al inicio</button>
+                <h2 class="view-title">Nueva publicación</h2>
+
+                <!-- mensaje de éxito al crear -->
+                <div id="form-success-create" class="toast toast--success hidden">
+                    &#10003; ¡Publicación creada exitosamente!
+                </div>
+
+                <!-- novalidate para manejar validaciones desde JS -->
+                <form id="form-create" class="post-form" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="create-title">Título</label>
+                        <input
+                            type="text"
+                            id="create-title"
+                            class="form-input"
+                            placeholder="Ingresa el título del artículo..."
+                        />
+                        <span class="form-error" id="error-create-title"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="create-body">Contenido</label>
+                        <textarea
+                            id="create-body"
+                            class="form-input form-textarea"
+                            placeholder="Escribe el contenido del artículo..."
+                        ></textarea>
+                        <span class="form-error" id="error-create-body"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="create-author">Autor</label>
+                        <input
+                            type="text"
+                            id="create-author"
+                            class="form-input"
+                            placeholder="Nombre del autor..."
+                        />
+                        <span class="form-error" id="error-create-author"></span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btn-submit-create">
+                            Publicar artículo
+                        </button>
+                        <button type="button" class="btn btn-outline" id="btn-cancel-create" data-route="home">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+
+        <!-- formulario para editar una publicación existente -->
+        <section id="view-edit" class="view hidden">
+            <div class="container container--narrow">
+
+                <button class="btn btn-ghost back-btn" id="btn-back-edit">&#8592; Volver</button>
+                <h2 class="view-title">Editar publicación</h2>
+
+                <div id="form-success-edit" class="toast toast--success hidden">
+                    &#10003; ¡Publicación actualizada exitosamente!
+                </div>
+
+                <form id="form-edit" class="post-form" novalidate>
+                    <!-- guardamos el ID para saber qué post actualizar -->
+                    <input type="hidden" id="edit-post-id" />
+                    <div class="form-group">
+                        <label class="form-label" for="edit-title">Título</label>
+                        <input
+                            type="text"
+                            id="edit-title"
+                            class="form-input"
+                            placeholder="Título del artículo..."
+                        />
+                        <span class="form-error" id="error-edit-title"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-body">Contenido</label>
+                        <textarea
+                            id="edit-body"
+                            class="form-input form-textarea"
+                            placeholder="Contenido del artículo..."
+                        ></textarea>
+                        <span class="form-error" id="error-edit-body"></span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btn-submit-edit">
+                            Guardar cambios
+                        </button>
+                        <button type="button" class="btn btn-outline" id="btn-cancel-edit">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+
+        <!-- sección extra: buscar posts por ID de autor -->
+        <section id="view-by-author" class="view hidden">
+            <div class="container">
+
+                <h2 class="view-title">Publicaciones por autor</h2>
+
+                <div class="author-search-bar">
+                    <input
+                        type="number"
+                        id="author-id-input"
+                        class="form-input author-input"
+                        placeholder="ID del autor (ej: 1, 2, 3...)"
+                        min="1"
+                        max="100"
+                    />
+                    <button class="btn btn-primary" id="btn-search-author">Buscar</button>
+                </div>
+                <p class="author-hint">DummyJSON tiene autores del ID 1 al 100.</p>
+
+                <div id="loader-author" class="loader-wrapper hidden">
+                    <div class="skeleton-grid">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+
+                <div id="error-author" class="error-banner hidden">
+                    <span class="error-icon">&#9888;</span>
+                    <p id="error-author-msg">No se encontraron publicaciones para ese autor.</p>
+                </div>
+
+                <div id="empty-author" class="empty-state hidden">
+                    <p class="empty-icon">&#128100;</p>
+                    <p>Este autor no tiene publicaciones.</p>
+                </div>
+
+                <div id="author-posts-grid" class="posts-grid"></div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- modal de confirmación antes de eliminar -->
+    <div id="modal-confirm" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 class="modal-title">&#9888; Confirmar eliminación</h3>
+            <p class="modal-body">¿Estás seguro de que querés eliminar esta publicación? Esta acción no se puede deshacer.</p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="btn-confirm-delete">Sí, eliminar</button>
+                <button class="btn btn-outline" id="btn-cancel-delete">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- toast flotante para mensajes de éxito -->
+    <div id="toast-global" class="toast-global hidden"></div>
+
+    <!-- scripts en este orden porque main.js depende de todos los demás -->
     <script src="js/api.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/router.js"></script>
-    <script src="js/ui.js"></script>
     <script src="js/validation.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/main.js"></script>
+
 </body>
 </html>

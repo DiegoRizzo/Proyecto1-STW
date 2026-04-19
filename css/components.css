@@ -1,1 +1,199 @@
-/* Cards, Botones, Formularios */
+/* grid principal de tarjetas */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 8px 0;
+}
+
+/* tarjeta individual de post */
+.post-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all var(--transition);
+    cursor: pointer;
+}
+
+/* efecto hover al pasar el mouse */
+.post-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+
+.post-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.post-card__title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    /* recorta el título a 2 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.post-card__body {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    /* recorta el contenido a 3 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.post-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.post-card__author {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.post-card__btn {
+    font-size: 0.82rem;
+    padding: 6px 14px;
+}
+
+/* badge de etiqueta */
+.tag-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(200, 169, 110, 0.2);
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
+}
+
+/* vista completa de un post */
+.post-detail {
+    padding: 16px 0 48px;
+}
+
+.post-detail__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.post-detail__title {
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+/* info del autor, vistas y reacciones */
+.post-detail__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.detail-author {
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.meta-sep {
+    color: var(--text-muted);
+}
+
+/* línea decorativa debajo del meta */
+.post-detail__divider {
+    height: 1px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    margin-bottom: 28px;
+    opacity: 0.4;
+}
+
+.post-detail__body {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    margin-bottom: 40px;
+}
+
+.post-detail__actions {
+    display: flex;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* contenedor del formulario de crear/editar */
+.post-form {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 48px;
+}
+
+/* responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+    .posts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .post-detail__title {
+        font-size: 1.8rem;
+    }
+
+    .post-detail__actions {
+        flex-direction: column;
+    }
+
+    .post-form {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .post-card {
+        padding: 18px;
+    }
+
+    .post-detail__meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .meta-sep {
+        display: none;
+    }
+}
